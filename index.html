@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="MexTrain">
+<meta name="theme-color" content="#f5e6c8">
+<title>Mexican Train Scorecard</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  /* ── THEME ── */
+  :root {
+    --bg:        #f5e6c8;
+    --brown:     #5c3d2e;
+    --brown-med: #8b6340;
+    --brown-lt:  rgba(92,61,46,0.15);
+    --border:    rgba(92,61,46,0.25);
+    --placeholder: rgba(92,61,46,0.4);
+    --white70:   rgba(255,255,255,0.7);
+    --white85:   rgba(255,255,255,0.85);
+    --gold:      rgba(255,215,0,0.35);
+    --red-warn:  #b22222;
+    --shadow:    0 2px 8px rgba(92,61,46,0.18);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Special Elite', cursive;
+    background: var(--bg);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    color: var(--brown);
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    touch-action: manipulation;
+  }
+
+  /* Safe area padding for notched phones */
+  .page {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: max(40px, env(safe-area-inset-bottom));
+  }
+
+  /* ── PAGES ── */
+  .page { display: none; min-height: 100vh; min-height: -webkit-fill-available; flex-direction: column; align-items: center; padding-top: 20px; }
+  .page.active { display: flex; }
+
+  /* ── TYPOGRAPHY ── */
+  h1 { font-size: clamp(28px, 6vw, 42px); text-align: center; line-height: 1.2; }
+  h2 { font-size: clamp(22px, 4vw, 32px); text-align: center; }
+  h3 { font-size: 20px; }
+  .caption { font-size: 12px; letter-spacing: 1.5px; opacity: 0.65; text-transform: uppercase; }
+  .body-text { font-family: 'Crimson Text', serif; font-size: 17px; line-height: 1.6; }
+
+  /* ── NAV BACK ── */
+  .nav-back {
+    align-self: flex-start;
+    background: none; border: none; cursor: pointer;
+    font-family: 'Special Elite', cursive;
+    font-size: 16px; color: var(--brown);
+    display: flex; align-items: center; gap: 4px;
+    padding: 4px 0; margin-bottom: 8px;
+  }
+  .nav-back:hover { opacity: 0.75; }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    background: var(--brown); color: #fff;
+    border: none; border-radius: 10px; cursor: pointer;
+    font-family: 'Special Elite', cursive; font-size: 18px;
+    padding: 12px 32px; box-shadow: var(--shadow);
+    transition: transform 0.1s, opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:active { transform: scale(0.97); }
+
+  .btn-secondary {
+    background: none; border: none; cursor: pointer;
+    font-family: 'Special Elite', cursive; font-size: 16px;
+    color: var(--brown); padding: 10px 20px;
+    text-decoration: underline; text-underline-offset: 3px;
+    transition: opacity 0.15s;
+  }
+  .btn-secondary:hover { opacity: 0.7; }
+
+  .btn-resume {
+    background: var(--brown-med); color: #fff;
+    border: none; border-radius: 10px; cursor: pointer;
+    font-family: 'Special Elite', cursive; font-size: 18px;
+    padding: 12px 32px; box-shadow: var(--shadow);
+    transition: opacity 0.15s;
+  }
+  .btn-resume:hover { opacity: 0.88; }
+
+  .btn-danger {
+    background: #c0392b; color: #fff;
+    border: none; border-radius: 10px; cursor: pointer;
+    font-family: 'Special Elite', cursive; font-size: 16px;
+    padding: 10px 20px; transition: opacity 0.15s;
+  }
+  .btn-danger:hover { opacity: 0.85; }
+
+  .btn-row { display: flex; gap: 10px; width: 100%; max-width: 500px; }
+  .btn-row .btn-primary { flex: 1; font-size: 15px; padding: 12px 8px; }
+
+  /* ── INPUT ── */
+  .input-field {
+    background: var(--white70);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'Special Elite', cursive;
+    font-size: 16px; color: var(--brown);
+    padding: 10px 14px; width: 100%;
+    outline: none; transition: border-color 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .input-field:focus { border-color: var(--brown); }
+  .input-field::placeholder { color: var(--placeholder); }
+  /* Hide number spinners */
+  .input-field::-webkit-inner-spin-button,
+  .input-field::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--white70);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 14px 16px;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 1000;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--bg); border-radius: 14px;
+    padding: 24px; max-width: 360px; width: 100%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    text-align: center;
+  }
+  .modal-box h3 { margin-bottom: 10px; }
+  .modal-box p { font-family: 'Crimson Text', serif; font-size: 16px; margin-bottom: 20px; opacity: 0.85; }
+  .modal-actions { display: flex; flex-direction: column; gap: 8px; }
+
+  /* ── STEPPER ── */
+  .stepper {
+    display: flex; align-items: center; gap: 20px;
+    background: var(--white70); border-radius: 10px;
+    padding: 10px 20px; border: 1px solid var(--border);
+  }
+  .stepper-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--brown); font-size: 28px; line-height: 1;
+    padding: 0 4px; transition: opacity 0.15s;
+  }
+  .stepper-btn:disabled { opacity: 0.3; cursor: default; }
+  .stepper-label { font-size: 18px; min-width: 120px; text-align: center; }
+
+  /* ── DOMINO SVG ── */
+  .domino-wrap { display: flex; justify-content: center; margin: 8px 0; }
+
+  /* ── SCORE GRID ── */
+  .score-table-wrap {
+    width: 100%; overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .score-table {
+    border-collapse: collapse;
+    font-family: 'Special Elite', cursive;
+    font-size: 14px; color: var(--brown);
+    min-width: 500px;
+  }
+  .score-table th, .score-table td {
+    padding: 6px 10px; text-align: center;
+    border: 1px solid var(--border);
+  }
+  .score-table th { background: var(--brown-lt); white-space: nowrap; }
+  .score-table td.name-col { text-align: left; background: var(--white70); white-space: nowrap; font-weight: 600; }
+  .score-table td.score-cell {
+    background: var(--white70); cursor: pointer; transition: background 0.15s;
+  }
+  .score-table td.score-cell:hover { background: rgba(255,255,255,0.95); }
+  .score-table td.total-col { background: var(--white85); font-weight: 700; }
+  .winner-row td { background: var(--gold) !important; }
+
+  /* ── PROGRESS ── */
+  .round-badge {
+    display: inline-block;
+    background: var(--brown-lt);
+    border-radius: 20px; padding: 4px 14px;
+    font-size: 13px; letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ── HISTORY CARD ── */
+  .history-card {
+    width: 100%; max-width: 500px;
+  }
+  .history-card .card { margin-bottom: 10px; }
+
+  /* ── HOME TRAIN IMAGE ── */
+  .train-circle {
+    width: 200px; height: 200px; border-radius: 50%;
+    background: var(--brown-lt);
+    border: 4px solid rgba(139,99,64,0.6);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow); overflow: hidden;
+    font-size: 80px;
+  }
+
+  /* ── PODIUM ── */
+  .podium-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border-radius: 10px;
+    border: 1px solid var(--border); margin-bottom: 8px;
+    width: 100%; max-width: 420px;
+    box-shadow: 0 2px 4px rgba(92,61,46,0.1);
+  }
+  .podium-rank { font-size: 22px; width: 36px; flex-shrink: 0; }
+  .podium-name { flex: 1; font-size: 20px; }
+  .podium-score { font-size: 20px; }
+
+  /* ── PLAYER NAME ROWS ── */
+  .player-name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .player-name-row label { font-size: 14px; min-width: 70px; opacity: 0.7; }
+
+  /* ── SCORE ENTRY ── */
+  .score-entry-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px; width: 100%; max-width: 420px;
+  }
+  .score-entry-name { min-width: 90px; font-size: 17px; }
+  .score-entry-input { flex: 1; max-width: 120px; text-align: center; font-size: 17px; }
+
+  /* ── IN-PROGRESS GAME ROW ── */
+  .game-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 14px; border-radius: 10px;
+    background: var(--white70); border: 1px solid var(--border);
+    box-shadow: var(--shadow); margin-bottom: 10px;
+    cursor: pointer; transition: background 0.15s; width: 100%; max-width: 500px;
+  }
+  .game-row:hover { background: var(--white85); }
+  .game-row-info { flex: 1; }
+  .game-row-title { font-size: 18px; margin-bottom: 4px; }
+  .game-row-meta { font-family: 'Crimson Text', serif; font-size: 14px; opacity: 0.7; }
+  .game-row-delete {
+    background: none; border: none; cursor: pointer;
+    color: #c0392b; font-size: 18px; padding: 0 4px;
+    transition: opacity 0.15s; flex-shrink: 0;
+  }
+  .game-row-delete:hover { opacity: 0.7; }
+
+  /* ── UTILS ── */
+  .spacer { flex: 1; }
+  .mt8 { margin-top: 8px; }
+  .mt12 { margin-top: 12px; }
+  .mt16 { margin-top: 16px; }
+  .mt20 { margin-top: 20px; }
+  .mt24 { margin-top: 24px; }
+  .mt32 { margin-top: 32px; }
+  .mb8  { margin-bottom: 8px; }
+  .mb16 { margin-bottom: 16px; }
+  .w100 { width: 100%; max-width: 500px; }
+  .text-center { text-align: center; }
+  .text-small { font-family: 'Crimson Text', serif; font-size: 14px; opacity: 0.65; }
+  .warn-text { color: var(--red-warn); font-family: 'Crimson Text', serif; font-size: 14px; }
+  .hidden { display: none !important; }
+  .empty-state { text-align: center; opacity: 0.55; padding: 40px 20px; }
+  .empty-state svg { margin-bottom: 16px; }
+  .divider { width: 100%; max-width: 500px; border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+  .full-w { width: 100%; }
+
+  /* ── SCROLLABLE CONTENT ── */
+  .scroll-content { width: 100%; overflow-y: auto; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 400px) {
+    .btn-row .btn-primary { font-size: 13px; padding: 10px 4px; }
+    .score-entry-name { min-width: 70px; font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     PAGE: HOME
+══════════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+  <div style="height:50px"></div>
+  <h1>Mexican Train<br>Scorecard</h1>
+  <div style="height:32px"></div>
+  <div class="train-circle">
+    <img src="assets/westernTrain.png" alt="Western Train" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='🚂'">
+  </div>
+  <div style="height:40px"></div>
+  <div id="home-resume-wrap" class="hidden">
+    <button class="btn-resume" onclick="showPage('page-resume')">Resume a Game</button>
+    <div style="height:10px"></div>
+  </div>
+  <button class="btn-primary" style="min-width:200px" onclick="showPage('page-setup')">Start New Game</button>
+  <button class="btn-secondary mt8" onclick="showPage('page-history')">View History</button>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE: SETUP
+══════════════════════════════════════════════ -->
+<div class="page" id="page-setup">
+  <button class="nav-back" onclick="showPage('page-home')">‹ Back</button>
+  <h2>Game Setup</h2>
+  <div style="height:20px"></div>
+
+  <p class="caption mb8">Number of Players</p>
+  <div class="stepper">
+    <button class="stepper-btn" id="setup-minus" onclick="adjustPlayers(-1)">−</button>
+    <span class="stepper-label" id="setup-count-label">4 Players</span>
+    <button class="stepper-btn" id="setup-plus" onclick="adjustPlayers(1)">+</button>
+  </div>
+  <p class="warn-text mt8" id="setup-draw-info">Each player draws 15 dominoes</p>
+
+  <div style="height:18px"></div>
+  <p class="caption mb8">Enter Player Names</p>
+  <div id="setup-names" class="w100"></div>
+
+  <div style="height:18px"></div>
+  <p class="caption mb8">Game Name (Optional)</p>
+  <input class="input-field w100" id="setup-gamename" placeholder="Leave blank for auto-name" style="max-width:500px">
+
+  <div style="height:24px"></div>
+  <button class="btn-primary" style="min-width:200px" onclick="startNewGame()">Start Game</button>
+  <button class="btn-secondary mt8" style="font-size:14px;color:#b8860b;text-decoration:none;background:rgba(255,165,0,0.2);border-radius:8px;padding:8px 20px" onclick="startTestMode()">🧪 Test Mode</button>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE: PLAY (ContentView)
+══════════════════════════════════════════════ -->
+<div class="page" id="page-play">
+  <div style="width:100%;max-width:500px">
+    <button class="nav-back" onclick="confirmExit()">‹ Exit</button>
+  </div>
+  <h2 id="play-title" style="margin-bottom:10px">Mexican Train Scorecard</h2>
+
+  <div class="domino-wrap" id="play-domino"></div>
+  <p id="play-round-label" style="font-size:20px;margin-bottom:16px"></p>
+  <p id="play-revisit-badge" class="round-badge mb8 hidden">Revisiting incomplete rounds</p>
+
+  <div id="play-entries"></div>
+
+  <div class="btn-row mt16">
+    <button class="btn-primary" onclick="showStatus()">Status</button>
+    <button class="btn-primary" onclick="showPage('page-scores')">Scores</button>
+    <button class="btn-primary" id="play-next-btn" onclick="saveScores()">Next</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE: STATUS SHEET (modal-like)
+══════════════════════════════════════════════ -->
+<div class="page" id="page-status">
+  <button class="nav-back" onclick="goBackToPlay()">‹ Back</button>
+  <h2>Game Status</h2>
+  <div style="height:16px"></div>
+
+  <div class="card w100 mb8">
+    <p class="caption mb8">Current Round</p>
+    <p id="status-round" style="font-size:18px"></p>
+  </div>
+  <div class="card w100">
+    <p class="caption mb8">Scores So Far</p>
+    <div id="status-scores"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE: PLAYER SCORES (PlayerScoreView)
+══════════════════════════════════════════════ -->
+<div class="page" id="page-scores">
+  <button class="nav-back" onclick="goBackToPlay()">‹ Back</button>
+  <h2>Player Scores</h2>
+  <div style="height:12px"></div>
+  <div class="score-table-wrap w100" style="max-width:700px">
+    <table class="score-table" id="scores-table"></table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE: FINAL SCORES (FinalScoreView)
+══════════════════════════════════════════════ -->
+<div class="page" id="page-final">
+  <h2>Final Scores</h2>
+  <div style="height:16px"></div>
+  <div style="font-size:72px;margin-bottom:8px">
+    <img src="assets/moneybag.png" alt="Winner" style="width:100px;height:100px;object-fit:contain;" onerror="this.outerHTML='💰'">
+  </div>
+  <p id="final-winner" style="font-size:26px;margin-bottom:20px"></p>
+  <div id="final-list" style="width:100%"></div>
+  <div style="height:24px"></div>
+  <button class="btn-primary" style="min-width:200px" onclick="newGameFromFinal()">New Game</button>
+  <button class="btn-secondary mt8" onclick="showPage('page-home')">Close</button>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE: RESUME (InProgressGamesView)
+══════════════════════════════════════════════ -->
+<div class="page" id="page-resume">
+  <button class="nav-back" onclick="showPage('page-home')">‹ Back</button>
+  <h2>Resume a Game</h2>
+  <div style="height:16px"></div>
+  <div id="resume-list" style="width:100%"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE: HISTORY (GameHistoryView)
+══════════════════════════════════════════════ -->
+<div class="page" id="page-history">
+  <button class="nav-back" onclick="showPage('page-home')">‹ Back</button>
+  <h2>Game History</h2>
+  <div style="height:16px"></div>
+  <div id="history-list" class="history-card"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════════ -->
+
+<!-- Exit confirmation -->
+<div class="modal-overlay" id="modal-exit">
+  <div class="modal-box">
+    <h3>Exit Game?</h3>
+    <p>Do you want to save your progress and resume later, or abandon this game?</p>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveAndExit()">Save &amp; Exit</button>
+      <button class="btn-danger" onclick="abandonGame()">Abandon Game</button>
+      <button class="btn-secondary" onclick="closeModal('modal-exit')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete game confirmation -->
+<div class="modal-overlay" id="modal-delete-game">
+  <div class="modal-box">
+    <h3>Delete Game?</h3>
+    <p>This game will be permanently deleted. This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn-danger" onclick="confirmDeleteGame()">Delete</button>
+      <button class="btn-secondary" onclick="closeModal('modal-delete-game')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit score -->
+<div class="modal-overlay" id="modal-edit-score">
+  <div class="modal-box">
+    <h3>Edit Score</h3>
+    <p id="modal-edit-label"></p>
+    <input class="input-field" id="modal-edit-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Score" autocomplete="off" style="text-align:center;font-size:22px;margin-bottom:16px">
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveEditedScore()">Save</button>
+      <button class="btn-secondary" onclick="closeModal('modal-edit-score')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Game limit warning -->
+<div class="modal-overlay" id="modal-limit">
+  <div class="modal-box">
+    <h3>Too Many Games</h3>
+    <p>You can only have 5 games in progress at a time. Please complete or delete a game before starting a new one.</p>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="closeModal('modal-limit')">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════════════
+const HISTORY_KEY = 'MexTrainHistory_v1';
+const MAX_IN_PROGRESS = 5;
+
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (!raw) return { inProgressGames: [], completedGames: [] };
+    return JSON.parse(raw);
+  } catch { return { inProgressGames: [], completedGames: [] }; }
+}
+
+function saveHistory(h) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+}
+
+function saveInProgressGame(state) {
+  const h = loadHistory();
+  state.lastUpdated = new Date().toISOString();
+  const idx = h.inProgressGames.findIndex(g => g.id === state.id);
+  if (idx >= 0) {
+    h.inProgressGames[idx] = state;
+  } else {
+    if (h.inProgressGames.length >= MAX_IN_PROGRESS) return false;
+    h.inProgressGames.push(state);
+  }
+  saveHistory(h);
+  return true;
+}
+
+function completeGame(id) {
+  const h = loadHistory();
+  const idx = h.inProgressGames.findIndex(g => g.id === id);
+  if (idx < 0) return;
+  const game = h.inProgressGames[idx];
+  game.isCompleted = true;
+  game.lastUpdated = new Date().toISOString();
+  if (!game.gameName) game.gameName = generateDefaultName(game.players, game.dateCreated);
+  h.completedGames.push(game);
+  h.inProgressGames.splice(idx, 1);
+  saveHistory(h);
+}
+
+function deleteInProgressGame(id) {
+  const h = loadHistory();
+  h.inProgressGames = h.inProgressGames.filter(g => g.id !== id);
+  saveHistory(h);
+}
+
+function canAddGame() {
+  return loadHistory().inProgressGames.length < MAX_IN_PROGRESS;
+}
+
+// ══════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+function generateDefaultName(players, dateStr) {
+  const initials = players.map(p => p.name[0] || '?').join(', ');
+  const d = new Date(dateStr);
+  return `${initials} - ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+}
+
+function autoGenerateName(dateStr) {
+  const d = new Date(dateStr);
+  return `Game on ${d.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}`;
+}
+
+function playerTotal(player) {
+  return player.scores.reduce((sum, s) => sum + (s != null ? s : 0), 0);
+}
+
+function drawCount(n) {
+  if (n <= 4) return 15;
+  if (n <= 6) return 12;
+  return 11;
+}
+
+// ══════════════════════════════════════════════
+// DOMINO IMAGE
+// ══════════════════════════════════════════════
+function makeDomino(n, size) {
+  const px = size * 2;
+  return `<img src="assets/domino${n}.png" alt="Double ${n}" style="width:${px}px;height:auto;max-width:100%;">`;
+}
+
+// ══════════════════════════════════════════════
+// GAME STATE (runtime)
+// ══════════════════════════════════════════════
+let G = null; // active game state
+
+function newGameState(players, gameName) {
+  return {
+    id: uuid(),
+    players: players.map(name => ({
+      id: uuid(), name,
+      scores: Array(13).fill(null)
+    })),
+    roundNumber: 12,
+    completedRounds: [],   // array of ints (JSON doesn't have Set)
+    revisitQueue: [],
+    isRevisiting: false,
+    dateCreated: new Date().toISOString(),
+    lastUpdated: new Date().toISOString(),
+    isCompleted: false,
+    gameName: gameName || null
+  };
+}
+
+function loadGameState(state) {
+  G = JSON.parse(JSON.stringify(state)); // deep clone
+}
+
+// ══════════════════════════════════════════════
+// PAGE NAVIGATION
+// ══════════════════════════════════════════════
+let _prevPage = 'page-home';
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+
+  // Render dynamic pages
+  if (id === 'page-home') renderHome();
+  if (id === 'page-setup') renderSetup();
+  if (id === 'page-play') renderPlay();
+  if (id === 'page-scores') renderScoresPage();
+  if (id === 'page-status') renderStatus();
+  if (id === 'page-resume') renderResumePage();
+  if (id === 'page-history') renderHistoryPage();
+  if (id === 'page-final') renderFinalPage();
+}
+
+function goBackToPlay() { showPage('page-play'); }
+
+// ══════════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════════
+function renderHome() {
+  const hasGames = loadHistory().inProgressGames.length > 0;
+  document.getElementById('home-resume-wrap').classList.toggle('hidden', !hasGames);
+}
+
+// ══════════════════════════════════════════════
+// SETUP
+// ══════════════════════════════════════════════
+let _setupPlayers = 4;
+let _setupNames = Array(8).fill('');
+
+function renderSetup() {
+  _setupPlayers = 4;
+  _setupNames = Array(8).fill('');
+  document.getElementById('setup-gamename').value = '';
+  updateSetupUI();
+}
+
+function updateSetupUI() {
+  document.getElementById('setup-count-label').textContent = `${_setupPlayers} Players`;
+  document.getElementById('setup-minus').disabled = _setupPlayers <= 2;
+  document.getElementById('setup-plus').disabled  = _setupPlayers >= 8;
+  document.getElementById('setup-draw-info').textContent =
+    `Each player draws ${drawCount(_setupPlayers)} dominoes`;
+
+  const container = document.getElementById('setup-names');
+  container.innerHTML = '';
+  for (let i = 0; i < _setupPlayers; i++) {
+    const row = document.createElement('div');
+    row.className = 'player-name-row';
+    row.innerHTML = `
+      <label>Player ${i+1}</label>
+      <input class="input-field" placeholder="Player ${i+1}" value="${_setupNames[i]}"
+        oninput="this.value=this.value;_setupNames[${i}]=this.value" style="flex:1">
+    `;
+    container.appendChild(row);
+  }
+}
+
+function adjustPlayers(delta) {
+  _setupPlayers = Math.max(2, Math.min(8, _setupPlayers + delta));
+  updateSetupUI();
+}
+
+function startNewGame() {
+  if (!canAddGame()) { openModal('modal-limit'); return; }
+  const players = _setupNames.slice(0, _setupPlayers).map((n,i) => n.trim() || `Player ${i+1}`);
+  const gameName = document.getElementById('setup-gamename').value.trim() || null;
+  G = newGameState(players, gameName);
+  saveInProgressGame(G);
+  showPage('page-play');
+}
+
+function startTestMode() {
+  if (!canAddGame()) { openModal('modal-limit'); return; }
+  G = newGameState(['Alice','Bob','Charlie','Diana'], null);
+  saveInProgressGame(G);
+  showPage('page-play');
+}
+
+// ══════════════════════════════════════════════
+// PLAY
+// ══════════════════════════════════════════════
+function renderPlay() {
+  if (!G) return;
+  const n = G.roundNumber;
+
+  // Domino
+  const size = dominoSize(G.players.length);
+  document.getElementById('play-domino').innerHTML = makeDomino(n, size);
+
+  document.getElementById('play-round-label').textContent = `Double ${n}`;
+
+  const isLast = G.isRevisiting && G.revisitQueue.length === 1;
+  document.getElementById('play-next-btn').textContent = isLast ? 'Grand Totals' : 'Next';
+
+  document.getElementById('play-revisit-badge').classList.toggle('hidden', !G.isRevisiting);
+
+  // Score entry rows
+  const container = document.getElementById('play-entries');
+  container.innerHTML = '';
+  G.players.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'score-entry-row';
+    row.innerHTML = `
+      <span class="score-entry-name">${p.name}</span>
+      <input class="input-field score-entry-input" id="score-input-${i}" type="text"
+        inputmode="numeric" pattern="[0-9]*" placeholder="Score" autocomplete="off">
+    `;
+    container.appendChild(row);
+  });
+
+  // Focus first field
+  setTimeout(() => {
+    const first = document.getElementById('score-input-0');
+    if (first) first.focus();
+  }, 100);
+}
+
+function dominoSize(playerCount) {
+  if (playerCount <= 4) return 80;
+  if (playerCount === 5) return 65;
+  if (playerCount === 6) return 55;
+  return 45;
+}
+
+function saveScores() {
+  const roundIndex = 12 - G.roundNumber;
+  let roundComplete = true;
+
+  G.players.forEach((p, i) => {
+    const input = document.getElementById(`score-input-${i}`);
+    const val = input ? input.value.trim() : '';
+    if (val === '' || isNaN(parseInt(val))) {
+      p.scores[roundIndex] = null;
+      roundComplete = false;
+    } else {
+      p.scores[roundIndex] = Math.min(999, parseInt(val));
+    }
+  });
+
+  if (roundComplete && !G.completedRounds.includes(G.roundNumber)) {
+    G.completedRounds.push(G.roundNumber);
+  }
+
+  if (!G.isRevisiting && G.roundNumber > 0) {
+    G.roundNumber--;
+    saveInProgressGame(G);
+    renderPlay();
+    return;
+  }
+
+  if (!G.isRevisiting && G.roundNumber === 0) {
+    G.isRevisiting = true;
+    G.revisitQueue = [11,10,9,8,7,6,5,4,3,2,1,0]
+      .filter(r => !G.completedRounds.includes(r));
+    // also check round 12
+    for (let r = 12; r >= 0; r--) {
+      if (!G.completedRounds.includes(r) && !G.revisitQueue.includes(r)) {
+        G.revisitQueue.unshift(r);
+      }
+    }
+  }
+
+  if (G.isRevisiting) {
+    G.revisitQueue = G.revisitQueue.filter(r => r !== G.roundNumber);
+    if (!roundComplete) G.revisitQueue.push(G.roundNumber);
+
+    if (G.revisitQueue.length === 0) {
+      // Game complete
+      completeGame(G.id);
+      showPage('page-final');
+      return;
+    } else {
+      G.roundNumber = G.revisitQueue[0];
+      saveInProgressGame(G);
+      renderPlay();
+    }
+  }
+}
+
+// ══════════════════════════════════════════════
+// STATUS
+// ══════════════════════════════════════════════
+function showStatus() {
+  showPage('page-status');
+}
+
+function renderStatus() {
+  if (!G) return;
+  document.getElementById('status-round').textContent = `Double ${G.roundNumber}`;
+  const scores = document.getElementById('status-scores');
+  scores.innerHTML = '';
+  const sorted = [...G.players].sort((a,b) => playerTotal(a) - playerTotal(b));
+  sorted.forEach(p => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);';
+    row.innerHTML = `<span>${p.name}</span><span style="font-weight:700">${playerTotal(p)}</span>`;
+    scores.appendChild(row);
+  });
+}
+
+// ══════════════════════════════════════════════
+// SCORES PAGE (PlayerScoreView)
+// ══════════════════════════════════════════════
+let _editPlayerIdx = null;
+let _editRoundIdx  = null;
+
+function renderScoresPage() {
+  if (!G) return;
+  const table = document.getElementById('scores-table');
+  const players = G.players;
+
+  // Header
+  let thead = '<thead><tr><th>Player</th>';
+  for (let i = 0; i < 13; i++) thead += `<th>Rd ${12-i}</th>`;
+  thead += '<th>Total</th></tr></thead>';
+
+  // Body
+  let tbody = '<tbody>';
+  players.forEach((p, pi) => {
+    const total = playerTotal(p);
+    tbody += `<tr><td class="name-col">${p.name}</td>`;
+    for (let ri = 0; ri < 13; ri++) {
+      const score = p.scores[ri];
+      const display = score != null ? score : '–';
+      tbody += `<td class="score-cell" onclick="openEditScore(${pi},${ri})">${display}</td>`;
+    }
+    tbody += `<td class="total-col">${total}</td></tr>`;
+  });
+  tbody += '</tbody>';
+
+  table.innerHTML = thead + tbody;
+}
+
+function openEditScore(playerIdx, roundIdx) {
+  _editPlayerIdx = playerIdx;
+  _editRoundIdx  = roundIdx;
+  const p = G.players[playerIdx];
+  const score = p.scores[roundIdx];
+  document.getElementById('modal-edit-label').textContent =
+    `Editing Round ${12 - roundIdx} for ${p.name}`;
+  document.getElementById('modal-edit-input').value = score != null ? score : '';
+  openModal('modal-edit-score');
+  setTimeout(() => document.getElementById('modal-edit-input').focus(), 100);
+}
+
+function saveEditedScore() {
+  if (_editPlayerIdx == null || _editRoundIdx == null) return;
+  const val = document.getElementById('modal-edit-input').value.trim();
+  if (val === '' || isNaN(parseInt(val))) {
+    G.players[_editPlayerIdx].scores[_editRoundIdx] = null;
+  } else {
+    G.players[_editPlayerIdx].scores[_editRoundIdx] = Math.min(999, parseInt(val));
+  }
+  saveInProgressGame(G);
+  closeModal('modal-edit-score');
+  renderScoresPage();
+}
+
+// ══════════════════════════════════════════════
+// FINAL SCORES
+// ══════════════════════════════════════════════
+function renderFinalPage() {
+  if (!G) return;
+  const sorted = [...G.players].sort((a,b) => playerTotal(a) - playerTotal(b));
+  const winner = sorted[0];
+  document.getElementById('final-winner').textContent = `${winner.name} Wins!`;
+
+  const list = document.getElementById('final-list');
+  list.innerHTML = '';
+  sorted.forEach((p, i) => {
+    const total = playerTotal(p);
+    const row = document.createElement('div');
+    row.className = 'podium-row';
+    row.style.background = i === 0 ? 'var(--gold)' : 'var(--white70)';
+    row.innerHTML = `
+      <span class="podium-rank">${i+1}.</span>
+      <span class="podium-name">${p.name}</span>
+      <span class="podium-score">${total}</span>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function newGameFromFinal() {
+  G = null;
+  showPage('page-setup');
+}
+
+// ══════════════════════════════════════════════
+// RESUME PAGE
+// ══════════════════════════════════════════════
+let _pendingDeleteId = null;
+
+function renderResumePage() {
+  const h = loadHistory();
+  const games = [...h.inProgressGames].sort((a,b) =>
+    new Date(b.lastUpdated) - new Date(a.lastUpdated));
+  const container = document.getElementById('resume-list');
+  container.innerHTML = '';
+
+  if (games.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div style="font-size:60px;margin-bottom:16px">🎲</div>
+        <p style="font-size:18px;margin-bottom:8px">No Games in Progress</p>
+        <p>Start a new game to see it here</p>
+      </div>`;
+    return;
+  }
+
+  games.forEach(game => {
+    const name = game.gameName || generateDefaultName(game.players, game.dateCreated);
+    const completed = game.completedRounds.length;
+    const row = document.createElement('div');
+    row.className = 'game-row';
+    row.innerHTML = `
+      <div class="game-row-info" onclick="resumeGame('${game.id}')">
+        <div class="game-row-title">${name}</div>
+        <div class="game-row-meta">${game.players.length} players &bull; ${completed}/13 rounds</div>
+      </div>
+      <button class="game-row-delete" onclick="event.stopPropagation();promptDeleteGame('${game.id}')">🗑</button>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function resumeGame(id) {
+  const h = loadHistory();
+  const state = h.inProgressGames.find(g => g.id === id);
+  if (!state) return;
+  loadGameState(state);
+  showPage('page-play');
+}
+
+function promptDeleteGame(id) {
+  _pendingDeleteId = id;
+  openModal('modal-delete-game');
+}
+
+function confirmDeleteGame() {
+  if (_pendingDeleteId) {
+    deleteInProgressGame(_pendingDeleteId);
+    _pendingDeleteId = null;
+  }
+  closeModal('modal-delete-game');
+  renderResumePage();
+  renderHome();
+}
+
+// ══════════════════════════════════════════════
+// HISTORY PAGE
+// ══════════════════════════════════════════════
+function renderHistoryPage() {
+  const h = loadHistory();
+  const games = [...h.completedGames].reverse();
+  const container = document.getElementById('history-list');
+  container.innerHTML = '';
+
+  if (games.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div style="font-size:60px;margin-bottom:16px">🕐</div>
+        <p style="font-size:18px;margin-bottom:8px">No completed games yet</p>
+        <p>Finish a game to see it here!</p>
+      </div>`;
+    return;
+  }
+
+  games.forEach(game => {
+    const name = game.gameName || autoGenerateName(game.dateCreated);
+    const sorted = [...game.players].sort((a,b) => playerTotal(a) - playerTotal(b));
+    const winner = sorted[0];
+    const winTotal = playerTotal(winner);
+
+    const card = document.createElement('div');
+    card.className = 'card mb8';
+    card.innerHTML = `
+      <p style="font-size:17px;font-weight:600;margin-bottom:6px">${name}</p>
+      <p style="font-family:'Crimson Text',serif;font-size:15px;margin-bottom:4px">
+        <strong>Winner:</strong> ${winner.name} (${winTotal} pts)
+      </p>
+      <p class="text-small">${game.players.length} players</p>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// ══════════════════════════════════════════════
+// EXIT FLOW
+// ══════════════════════════════════════════════
+function confirmExit() { openModal('modal-exit'); }
+
+function saveAndExit() {
+  if (G) saveInProgressGame(G);
+  closeModal('modal-exit');
+  G = null;
+  showPage('page-home');
+}
+
+function abandonGame() {
+  if (G) deleteInProgressGame(G.id);
+  closeModal('modal-exit');
+  G = null;
+  showPage('page-home');
+}
+
+// ══════════════════════════════════════════════
+// MODAL HELPERS
+// ══════════════════════════════════════════════
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+
+// Scroll focused input into view when keyboard opens (iOS fix)
+document.addEventListener('focusin', e => {
+  if (e.target.matches('input')) {
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 350); // wait for keyboard animation
+  }
+});
+
+renderHome();
+</script>
+</body>
+</html>
