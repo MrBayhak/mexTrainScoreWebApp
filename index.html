@@ -974,7 +974,7 @@ function renderHistoryPage() {
   if (games.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <div style="font-size:60px;margin-bottom:16px">🕐</div>
+        <img src="assets/noGames.png" alt="Empty Game Parlor" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='🕐">
         <p style="font-size:18px;margin-bottom:8px">No completed games yet</p>
         <p>Finish a game to see it here!</p>
       </div>`;
