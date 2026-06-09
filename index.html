@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!-- viewport-fit=cover is required for env(safe-area-inset-*) to take effect.
+     Pinch-zoom is intentionally NOT disabled (accessibility / WCAG 1.4.4). -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="MexTrain">
@@ -219,14 +221,14 @@
     font-size: 80px;
   }
 
-  /* ── NO GAME PARLOR IMAGE ── */
-  
+  /* ── ASSET CIRCLE (empty states) ── */
   .asset-circle {
     width: 200px; height: 200px; border-radius: 50%;
     background: var(--brown-lt);
     border: 4px solid rgba(139,99,64,0.6);
     display: flex; align-items: center; justify-content: center;
     box-shadow: var(--shadow); overflow: hidden;
+    font-size: 80px;
   }
 
   /* ── PODIUM ── */
@@ -287,7 +289,7 @@
   .text-small { font-family: 'Crimson Text', serif; font-size: 14px; opacity: 0.65; }
   .warn-text { color: var(--red-warn); font-family: 'Crimson Text', serif; font-size: 14px; }
   .hidden { display: none !important; }
-  .empty-state { text-align: center; opacity: 0.55; padding: 40px 20px; }
+  .empty-state { text-align: center; opacity: 0.55; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
   .empty-state svg { margin-bottom: 16px; }
   .divider { width: 100%; max-width: 500px; border: none; border-top: 1px solid var(--border); margin: 8px 0; }
   .full-w { width: 100%; }
@@ -312,30 +314,30 @@
   <h1>Mexican Train<br>Scorecard</h1>
   <div style="height:32px"></div>
   <div class="train-circle">
-    <img src="assets/westernTrain.png" alt="Western Train" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='🚂'">
+    <img src="assets/westernTrain.png" alt="Western Train" style="width:100%;height:100%;object-fit:cover;" data-fallback="🚂" data-fallback-target="parent">
   </div>
   <div style="height:40px"></div>
   <div id="home-resume-wrap" class="hidden">
-    <button class="btn-resume" onclick="showPage('page-resume')">Resume a Game</button>
+    <button class="btn-resume" data-action="nav" data-page="page-resume">Resume a Game</button>
     <div style="height:10px"></div>
   </div>
-  <button class="btn-primary" style="min-width:200px" onclick="showPage('page-setup')">Start New Game</button>
-  <button class="btn-secondary mt8" onclick="showPage('page-history')">View History</button>
+  <button class="btn-primary" style="min-width:200px" data-action="nav" data-page="page-setup">Start New Game</button>
+  <button class="btn-secondary mt8" data-action="nav" data-page="page-history">View History</button>
 </div>
 
 <!-- ══════════════════════════════════════════════
      PAGE: SETUP
 ══════════════════════════════════════════════ -->
 <div class="page" id="page-setup">
-  <button class="nav-back" onclick="showPage('page-home')">‹ Back</button>
+  <button class="nav-back" data-action="nav" data-page="page-home">‹ Back</button>
   <h2>Game Setup</h2>
   <div style="height:20px"></div>
 
   <p class="caption mb8">Number of Players</p>
   <div class="stepper">
-    <button class="stepper-btn" id="setup-minus" onclick="adjustPlayers(-1)">−</button>
+    <button class="stepper-btn" id="setup-minus" data-action="players-dec" aria-label="Remove player">−</button>
     <span class="stepper-label" id="setup-count-label">4 Players</span>
-    <button class="stepper-btn" id="setup-plus" onclick="adjustPlayers(1)">+</button>
+    <button class="stepper-btn" id="setup-plus" data-action="players-inc" aria-label="Add player">+</button>
   </div>
   <p class="warn-text mt8" id="setup-draw-info">Each player draws 15 dominoes</p>
 
@@ -345,11 +347,11 @@
 
   <div style="height:18px"></div>
   <p class="caption mb8">Game Name (Optional)</p>
-  <input class="input-field w100" id="setup-gamename" placeholder="Leave blank for auto-name" style="max-width:500px">
+  <input class="input-field w100" id="setup-gamename" placeholder="Leave blank for auto-name" style="max-width:500px" maxlength="60">
 
   <div style="height:24px"></div>
-  <button class="btn-primary" style="min-width:200px" onclick="startNewGame()">Start Game</button>
-  <!--<button class="btn-secondary mt8" style="font-size:14px;color:#b8860b;text-decoration:none;background:rgba(255,165,0,0.2);border-radius:8px;padding:8px 20px" onclick="startTestMode()">🧪 Test Mode</button>-->
+  <button class="btn-primary" style="min-width:200px" data-action="start-game">Start Game</button>
+  <!--<button class="btn-secondary mt8" style="font-size:14px;color:#b8860b;text-decoration:none;background:rgba(255,165,0,0.2);border-radius:8px;padding:8px 20px" data-action="test-mode">🧪 Test Mode</button>-->
 </div>
 
 <!-- ══════════════════════════════════════════════
@@ -357,7 +359,7 @@
 ══════════════════════════════════════════════ -->
 <div class="page" id="page-play">
   <div style="width:100%;max-width:500px">
-    <button class="nav-back" onclick="confirmExit()">‹ Exit</button>
+    <button class="nav-back" data-action="exit">‹ Exit</button>
   </div>
   <h2 id="play-title" style="margin-bottom:10px">Mexican Train Scorecard</h2>
 
@@ -368,9 +370,9 @@
   <div id="play-entries"></div>
 
   <div class="btn-row mt16">
-    <button class="btn-primary" onclick="showStatus()">Status</button>
-    <button class="btn-primary" onclick="showPage('page-scores')">Scores</button>
-    <button class="btn-primary" id="play-next-btn" onclick="saveScores()">Next</button>
+    <button class="btn-primary" data-action="status">Status</button>
+    <button class="btn-primary" data-action="nav" data-page="page-scores">Scores</button>
+    <button class="btn-primary" id="play-next-btn" data-action="save-scores">Next</button>
   </div>
 </div>
 
@@ -378,7 +380,7 @@
      PAGE: STATUS SHEET (modal-like)
 ══════════════════════════════════════════════ -->
 <div class="page" id="page-status">
-  <button class="nav-back" onclick="goBackToPlay()">‹ Back</button>
+  <button class="nav-back" data-action="back-to-play">‹ Back</button>
   <h2>Game Status</h2>
   <div style="height:16px"></div>
 
@@ -396,7 +398,7 @@
      PAGE: PLAYER SCORES (PlayerScoreView)
 ══════════════════════════════════════════════ -->
 <div class="page" id="page-scores">
-  <button class="nav-back" onclick="goBackToPlay()">‹ Back</button>
+  <button class="nav-back" data-action="back-to-play">‹ Back</button>
   <h2>Player Scores</h2>
   <div style="height:12px"></div>
   <div class="score-table-wrap w100" style="max-width:700px">
@@ -411,20 +413,20 @@
   <h2>Final Scores</h2>
   <div style="height:16px"></div>
   <div style="font-size:72px;margin-bottom:8px">
-    <img src="assets/moneybag.png" alt="Winner" style="width:100px;height:100px;object-fit:contain;" onerror="this.outerHTML='💰'">
+    <img src="assets/moneybag.png" alt="Winner" style="width:100px;height:100px;object-fit:contain;" data-fallback="💰">
   </div>
   <p id="final-winner" style="font-size:26px;margin-bottom:20px"></p>
   <div id="final-list" style="width:100%"></div>
   <div style="height:24px"></div>
-  <button class="btn-primary" style="min-width:200px" onclick="newGameFromFinal()">New Game</button>
-  <button class="btn-secondary mt8" onclick="showPage('page-home')">Close</button>
+  <button class="btn-primary" style="min-width:200px" data-action="new-game-final">New Game</button>
+  <button class="btn-secondary mt8" data-action="nav" data-page="page-home">Close</button>
 </div>
 
 <!-- ══════════════════════════════════════════════
      PAGE: RESUME (InProgressGamesView)
 ══════════════════════════════════════════════ -->
 <div class="page" id="page-resume">
-  <button class="nav-back" onclick="showPage('page-home')">‹ Back</button>
+  <button class="nav-back" data-action="nav" data-page="page-home">‹ Back</button>
   <h2>Resume a Game</h2>
   <div style="height:16px"></div>
   <div id="resume-list" style="width:100%"></div>
@@ -434,7 +436,7 @@
      PAGE: HISTORY (GameHistoryView)
 ══════════════════════════════════════════════ -->
 <div class="page" id="page-history">
-  <button class="nav-back" onclick="showPage('page-home')">‹ Back</button>
+  <button class="nav-back" data-action="nav" data-page="page-home">‹ Back</button>
   <h2>Game History</h2>
   <div style="height:16px"></div>
   <div id="history-list" class="history-card"></div>
@@ -450,9 +452,9 @@
     <h3>Exit Game?</h3>
     <p>Do you want to save your progress and resume later, or abandon this game?</p>
     <div class="modal-actions">
-      <button class="btn-primary" onclick="saveAndExit()">Save &amp; Exit</button>
-      <button class="btn-danger" onclick="abandonGame()">Abandon Game</button>
-      <button class="btn-secondary" onclick="closeModal('modal-exit')">Cancel</button>
+      <button class="btn-primary" data-action="save-and-exit">Save &amp; Exit</button>
+      <button class="btn-danger" data-action="abandon">Abandon Game</button>
+      <button class="btn-secondary" data-action="close-modal" data-modal="modal-exit">Cancel</button>
     </div>
   </div>
 </div>
@@ -463,8 +465,8 @@
     <h3>Delete Game?</h3>
     <p>This game will be permanently deleted. This action cannot be undone.</p>
     <div class="modal-actions">
-      <button class="btn-danger" onclick="confirmDeleteGame()">Delete</button>
-      <button class="btn-secondary" onclick="closeModal('modal-delete-game')">Cancel</button>
+      <button class="btn-danger" data-action="confirm-delete">Delete</button>
+      <button class="btn-secondary" data-action="close-modal" data-modal="modal-delete-game">Cancel</button>
     </div>
   </div>
 </div>
@@ -474,10 +476,10 @@
   <div class="modal-box">
     <h3>Edit Score</h3>
     <p id="modal-edit-label"></p>
-    <input class="input-field" id="modal-edit-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Score" autocomplete="off" style="text-align:center;font-size:22px;margin-bottom:16px">
+    <input class="input-field" id="modal-edit-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Score" autocomplete="off" maxlength="3" style="text-align:center;font-size:22px;margin-bottom:16px">
     <div class="modal-actions">
-      <button class="btn-primary" onclick="saveEditedScore()">Save</button>
-      <button class="btn-secondary" onclick="closeModal('modal-edit-score')">Cancel</button>
+      <button class="btn-primary" data-action="save-edit">Save</button>
+      <button class="btn-secondary" data-action="close-modal" data-modal="modal-edit-score">Cancel</button>
     </div>
   </div>
 </div>
@@ -488,28 +490,60 @@
     <h3>Too Many Games</h3>
     <p>You can only have 5 games in progress at a time. Please complete or delete a game before starting a new one.</p>
     <div class="modal-actions">
-      <button class="btn-primary" onclick="closeModal('modal-limit')">OK</button>
+      <button class="btn-primary" data-action="close-modal" data-modal="modal-limit">OK</button>
     </div>
   </div>
 </div>
 
 <script>
+'use strict';
+
+// ══════════════════════════════════════════════
+// CONSTANTS
+// ══════════════════════════════════════════════
+const HISTORY_KEY     = 'MexTrainHistory_v1';
+const MAX_IN_PROGRESS = 5;
+const TOTAL_ROUNDS    = 13;   // doubles 12 down to 0
+const HIGHEST_ROUND   = 12;
+const MAX_SCORE       = 999;
+const MAX_NAME_LEN    = 40;
+
+// ══════════════════════════════════════════════
+// SECURITY HELPER — escape any user-controlled
+// string before it is placed into innerHTML.
+// ══════════════════════════════════════════════
+const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => HTML_ESCAPES[ch]);
+}
+
 // ══════════════════════════════════════════════
 // STORAGE
 // ══════════════════════════════════════════════
-const HISTORY_KEY = 'MexTrainHistory_v1';
-const MAX_IN_PROGRESS = 5;
-
 function loadHistory() {
   try {
     const raw = localStorage.getItem(HISTORY_KEY);
     if (!raw) return { inProgressGames: [], completedGames: [] };
-    return JSON.parse(raw);
-  } catch { return { inProgressGames: [], completedGames: [] }; }
+    const parsed = JSON.parse(raw);
+    // Shape-guard so a malformed/tampered value can never crash a render.
+    return {
+      inProgressGames: Array.isArray(parsed.inProgressGames) ? parsed.inProgressGames : [],
+      completedGames:  Array.isArray(parsed.completedGames)  ? parsed.completedGames  : []
+    };
+  } catch {
+    return { inProgressGames: [], completedGames: [] };
+  }
 }
 
 function saveHistory(h) {
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+    return true;
+  } catch (err) {
+    // Quota exceeded or storage disabled (e.g. private mode).
+    console.error('Could not save history:', err);
+    return false;
+  }
 }
 
 function saveInProgressGame(state) {
@@ -522,8 +556,7 @@ function saveInProgressGame(state) {
     if (h.inProgressGames.length >= MAX_IN_PROGRESS) return false;
     h.inProgressGames.push(state);
   }
-  saveHistory(h);
-  return true;
+  return saveHistory(h);
 }
 
 function completeGame(id) {
@@ -553,6 +586,10 @@ function canAddGame() {
 // HELPERS
 // ══════════════════════════════════════════════
 function uuid() {
+  // Prefer the standardized crypto API; fall back for very old browsers.
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
     const r = Math.random() * 16 | 0;
     return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
@@ -560,7 +597,7 @@ function uuid() {
 }
 
 function generateDefaultName(players, dateStr) {
-  const initials = players.map(p => p.name[0] || '?').join(', ');
+  const initials = players.map(p => (p.name && p.name[0]) || '?').join(', ');
   const d = new Date(dateStr);
   return `${initials} - ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
 }
@@ -578,6 +615,16 @@ function drawCount(n) {
   if (n <= 4) return 15;
   if (n <= 6) return 12;
   return 11;
+}
+
+// Parse a raw score string into a clamped int, or null if blank/invalid.
+// House rule: scores are always 0 or greater.
+function parseScore(raw) {
+  const val = String(raw).trim();
+  if (val === '') return null;
+  const n = parseInt(val, 10);
+  if (Number.isNaN(n)) return null;
+  return Math.max(0, Math.min(MAX_SCORE, n));
 }
 
 // ══════════════════════════════════════════════
@@ -598,10 +645,10 @@ function newGameState(players, gameName) {
     id: uuid(),
     players: players.map(name => ({
       id: uuid(), name,
-      scores: Array(13).fill(null)
+      scores: Array(TOTAL_ROUNDS).fill(null)
     })),
-    roundNumber: 12,
-    completedRounds: [],   // array of ints (JSON doesn't have Set)
+    roundNumber: HIGHEST_ROUND,
+    completedRounds: [],   // array of ints (JSON has no Set)
     revisitQueue: [],
     isRevisiting: false,
     dateCreated: new Date().toISOString(),
@@ -612,28 +659,33 @@ function newGameState(players, gameName) {
 }
 
 function loadGameState(state) {
-  G = JSON.parse(JSON.stringify(state)); // deep clone
+  G = (typeof structuredClone === 'function')
+    ? structuredClone(state)
+    : JSON.parse(JSON.stringify(state));
 }
 
 // ══════════════════════════════════════════════
 // PAGE NAVIGATION
 // ══════════════════════════════════════════════
-let _prevPage = 'page-home';
+const PAGE_RENDERERS = {
+  'page-home':    renderHome,
+  'page-setup':   renderSetup,
+  'page-play':    renderPlay,
+  'page-scores':  renderScoresPage,
+  'page-status':  renderStatus,
+  'page-resume':  renderResumePage,
+  'page-history': renderHistoryPage,
+  'page-final':   renderFinalPage
+};
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const page = document.getElementById(id);
+  if (!page) return;
+  page.classList.add('active');
   window.scrollTo(0, 0);
-
-  // Render dynamic pages
-  if (id === 'page-home') renderHome();
-  if (id === 'page-setup') renderSetup();
-  if (id === 'page-play') renderPlay();
-  if (id === 'page-scores') renderScoresPage();
-  if (id === 'page-status') renderStatus();
-  if (id === 'page-resume') renderResumePage();
-  if (id === 'page-history') renderHistoryPage();
-  if (id === 'page-final') renderFinalPage();
+  const render = PAGE_RENDERERS[id];
+  if (render) render();
 }
 
 function goBackToPlay() { showPage('page-play'); }
@@ -672,9 +724,10 @@ function updateSetupUI() {
     const row = document.createElement('div');
     row.className = 'player-name-row';
     row.innerHTML = `
-      <label>Player ${i+1}</label>
-      <input class="input-field" placeholder="Player ${i+1}" value="${_setupNames[i]}"
-        oninput="this.value=this.value;_setupNames[${i}]=this.value" style="flex:1">
+      <label for="setup-name-${i}">Player ${i + 1}</label>
+      <input id="setup-name-${i}" class="input-field" placeholder="Player ${i + 1}"
+        maxlength="${MAX_NAME_LEN}" value="${escapeHtml(_setupNames[i])}"
+        data-action="setup-name" data-index="${i}" style="flex:1">
     `;
     container.appendChild(row);
   }
@@ -687,8 +740,10 @@ function adjustPlayers(delta) {
 
 function startNewGame() {
   if (!canAddGame()) { openModal('modal-limit'); return; }
-  const players = _setupNames.slice(0, _setupPlayers).map((n,i) => n.trim() || `Player ${i+1}`);
-  const gameName = document.getElementById('setup-gamename').value.trim() || null;
+  const players = _setupNames
+    .slice(0, _setupPlayers)
+    .map((n, i) => (n.trim() || `Player ${i + 1}`).slice(0, MAX_NAME_LEN));
+  const gameName = document.getElementById('setup-gamename').value.trim().slice(0, 60) || null;
   G = newGameState(players, gameName);
   saveInProgressGame(G);
   showPage('page-play');
@@ -696,7 +751,7 @@ function startNewGame() {
 
 function startTestMode() {
   if (!canAddGame()) { openModal('modal-limit'); return; }
-  G = newGameState(['Alice','Bob','Charlie','Diana'], null);
+  G = newGameState(['Alice', 'Bob', 'Charlie', 'Diana'], null);
   saveInProgressGame(G);
   showPage('page-play');
 }
@@ -708,32 +763,31 @@ function renderPlay() {
   if (!G) return;
   const n = G.roundNumber;
 
-  // Domino
   const size = dominoSize(G.players.length);
   document.getElementById('play-domino').innerHTML = makeDomino(n, size);
-
   document.getElementById('play-round-label').textContent = `Double ${n}`;
 
   const isLast = G.isRevisiting && G.revisitQueue.length === 1;
   document.getElementById('play-next-btn').textContent = isLast ? 'Grand Totals' : 'Next';
-
   document.getElementById('play-revisit-badge').classList.toggle('hidden', !G.isRevisiting);
 
-  // Score entry rows
+  const roundIndex = HIGHEST_ROUND - n;
   const container = document.getElementById('play-entries');
   container.innerHTML = '';
   G.players.forEach((p, i) => {
+    const existing = p.scores[roundIndex];
     const row = document.createElement('div');
     row.className = 'score-entry-row';
     row.innerHTML = `
-      <span class="score-entry-name">${p.name}</span>
+      <span class="score-entry-name">${escapeHtml(p.name)}</span>
       <input class="input-field score-entry-input" id="score-input-${i}" type="text"
-        inputmode="numeric" pattern="[0-9]*" placeholder="Score" autocomplete="off">
+        inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="Score" autocomplete="off"
+        value="${existing != null ? existing : ''}">
     `;
     container.appendChild(row);
   });
 
-  // Focus first field
+  // Focus first field once layout settles.
   setTimeout(() => {
     const first = document.getElementById('score-input-0');
     if (first) first.focus();
@@ -748,24 +802,22 @@ function dominoSize(playerCount) {
 }
 
 function saveScores() {
-  const roundIndex = 12 - G.roundNumber;
+  if (!G) return;
+  const roundIndex = HIGHEST_ROUND - G.roundNumber;
   let roundComplete = true;
 
   G.players.forEach((p, i) => {
     const input = document.getElementById(`score-input-${i}`);
-    const val = input ? input.value.trim() : '';
-    if (val === '' || isNaN(parseInt(val))) {
-      p.scores[roundIndex] = null;
-      roundComplete = false;
-    } else {
-      p.scores[roundIndex] = Math.min(999, parseInt(val));
-    }
+    const score = parseScore(input ? input.value : '');
+    p.scores[roundIndex] = score;
+    if (score == null) roundComplete = false;
   });
 
   if (roundComplete && !G.completedRounds.includes(G.roundNumber)) {
     G.completedRounds.push(G.roundNumber);
   }
 
+  // Normal descent: 12 → 0.
   if (!G.isRevisiting && G.roundNumber > 0) {
     G.roundNumber--;
     saveInProgressGame(G);
@@ -773,32 +825,27 @@ function saveScores() {
     return;
   }
 
+  // First time we hit round 0, switch to revisiting any unfinished rounds.
   if (!G.isRevisiting && G.roundNumber === 0) {
     G.isRevisiting = true;
-    G.revisitQueue = [11,10,9,8,7,6,5,4,3,2,1,0]
-      .filter(r => !G.completedRounds.includes(r));
-    // also check round 12
-    for (let r = 12; r >= 0; r--) {
-      if (!G.completedRounds.includes(r) && !G.revisitQueue.includes(r)) {
-        G.revisitQueue.unshift(r);
-      }
+    G.revisitQueue = [];
+    for (let r = HIGHEST_ROUND; r >= 0; r--) {
+      if (!G.completedRounds.includes(r)) G.revisitQueue.push(r);
     }
   }
 
   if (G.isRevisiting) {
     G.revisitQueue = G.revisitQueue.filter(r => r !== G.roundNumber);
-    if (!roundComplete) G.revisitQueue.push(G.roundNumber);
+    if (!roundComplete) G.revisitQueue.push(G.roundNumber); // requeue if still unfinished
 
     if (G.revisitQueue.length === 0) {
-      // Game complete
       completeGame(G.id);
       showPage('page-final');
       return;
-    } else {
-      G.roundNumber = G.revisitQueue[0];
-      saveInProgressGame(G);
-      renderPlay();
     }
+    G.roundNumber = G.revisitQueue[0];
+    saveInProgressGame(G);
+    renderPlay();
   }
 }
 
@@ -814,11 +861,11 @@ function renderStatus() {
   document.getElementById('status-round').textContent = `Double ${G.roundNumber}`;
   const scores = document.getElementById('status-scores');
   scores.innerHTML = '';
-  const sorted = [...G.players].sort((a,b) => playerTotal(a) - playerTotal(b));
+  const sorted = [...G.players].sort((a, b) => playerTotal(a) - playerTotal(b));
   sorted.forEach(p => {
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);';
-    row.innerHTML = `<span>${p.name}</span><span style="font-weight:700">${playerTotal(p)}</span>`;
+    row.innerHTML = `<span>${escapeHtml(p.name)}</span><span style="font-weight:700">${playerTotal(p)}</span>`;
     scores.appendChild(row);
   });
 }
@@ -834,22 +881,19 @@ function renderScoresPage() {
   const table = document.getElementById('scores-table');
   const players = G.players;
 
-  // Header
   let thead = '<thead><tr><th>Player</th>';
-  for (let i = 0; i < 13; i++) thead += `<th>Rd ${12-i}</th>`;
+  for (let i = 0; i < TOTAL_ROUNDS; i++) thead += `<th>Rd ${HIGHEST_ROUND - i}</th>`;
   thead += '<th>Total</th></tr></thead>';
 
-  // Body
   let tbody = '<tbody>';
   players.forEach((p, pi) => {
-    const total = playerTotal(p);
-    tbody += `<tr><td class="name-col">${p.name}</td>`;
-    for (let ri = 0; ri < 13; ri++) {
+    tbody += `<tr><td class="name-col">${escapeHtml(p.name)}</td>`;
+    for (let ri = 0; ri < TOTAL_ROUNDS; ri++) {
       const score = p.scores[ri];
       const display = score != null ? score : '–';
-      tbody += `<td class="score-cell" onclick="openEditScore(${pi},${ri})">${display}</td>`;
+      tbody += `<td class="score-cell" data-action="edit-score" data-player="${pi}" data-round="${ri}">${display}</td>`;
     }
-    tbody += `<td class="total-col">${total}</td></tr>`;
+    tbody += `<td class="total-col">${playerTotal(p)}</td></tr>`;
   });
   tbody += '</tbody>';
 
@@ -862,20 +906,16 @@ function openEditScore(playerIdx, roundIdx) {
   const p = G.players[playerIdx];
   const score = p.scores[roundIdx];
   document.getElementById('modal-edit-label').textContent =
-    `Editing Round ${12 - roundIdx} for ${p.name}`;
+    `Editing Round ${HIGHEST_ROUND - roundIdx} for ${p.name}`; // textContent → safe
   document.getElementById('modal-edit-input').value = score != null ? score : '';
   openModal('modal-edit-score');
   setTimeout(() => document.getElementById('modal-edit-input').focus(), 100);
 }
 
 function saveEditedScore() {
-  if (_editPlayerIdx == null || _editRoundIdx == null) return;
-  const val = document.getElementById('modal-edit-input').value.trim();
-  if (val === '' || isNaN(parseInt(val))) {
-    G.players[_editPlayerIdx].scores[_editRoundIdx] = null;
-  } else {
-    G.players[_editPlayerIdx].scores[_editRoundIdx] = Math.min(999, parseInt(val));
-  }
+  if (_editPlayerIdx === null || _editRoundIdx === null) return;
+  G.players[_editPlayerIdx].scores[_editRoundIdx] =
+    parseScore(document.getElementById('modal-edit-input').value);
   saveInProgressGame(G);
   closeModal('modal-edit-score');
   renderScoresPage();
@@ -886,21 +926,20 @@ function saveEditedScore() {
 // ══════════════════════════════════════════════
 function renderFinalPage() {
   if (!G) return;
-  const sorted = [...G.players].sort((a,b) => playerTotal(a) - playerTotal(b));
+  const sorted = [...G.players].sort((a, b) => playerTotal(a) - playerTotal(b));
   const winner = sorted[0];
-  document.getElementById('final-winner').textContent = `${winner.name} Wins!`;
+  document.getElementById('final-winner').textContent = `${winner.name} Wins!`; // textContent → safe
 
   const list = document.getElementById('final-list');
   list.innerHTML = '';
   sorted.forEach((p, i) => {
-    const total = playerTotal(p);
     const row = document.createElement('div');
     row.className = 'podium-row';
     row.style.background = i === 0 ? 'var(--gold)' : 'var(--white70)';
     row.innerHTML = `
-      <span class="podium-rank">${i+1}.</span>
-      <span class="podium-name">${p.name}</span>
-      <span class="podium-score">${total}</span>
+      <span class="podium-rank">${i + 1}.</span>
+      <span class="podium-name">${escapeHtml(p.name)}</span>
+      <span class="podium-score">${playerTotal(p)}</span>
     `;
     list.appendChild(row);
   });
@@ -918,7 +957,7 @@ let _pendingDeleteId = null;
 
 function renderResumePage() {
   const h = loadHistory();
-  const games = [...h.inProgressGames].sort((a,b) =>
+  const games = [...h.inProgressGames].sort((a, b) =>
     new Date(b.lastUpdated) - new Date(a.lastUpdated));
   const container = document.getElementById('resume-list');
   container.innerHTML = '';
@@ -927,11 +966,11 @@ function renderResumePage() {
     container.innerHTML = `
       <div class="empty-state">
         <div class="asset-circle" style="margin-bottom:16px">
-          <img src="assets/noGames.png" alt="No Games" style="width:100%;height:100%;object-fit:cover;" onerror="this.outerHTML='🎲'">
+          <img src="assets/noGames.png" alt="No games" style="width:100%;height:100%;object-fit:cover;" data-fallback="🎲">
         </div>
-      <p style="font-size:18px;margin-bottom:8px">No Games in Progress</p>
-      <p>Start a new game to see it here</p>
-  </div>`;
+        <p style="font-size:18px;margin-bottom:8px">No Games in Progress</p>
+        <p>Start a new game to see it here</p>
+      </div>`;
     return;
   }
 
@@ -941,11 +980,11 @@ function renderResumePage() {
     const row = document.createElement('div');
     row.className = 'game-row';
     row.innerHTML = `
-      <div class="game-row-info" onclick="resumeGame('${game.id}')">
-        <div class="game-row-title">${name}</div>
-        <div class="game-row-meta">${game.players.length} players &bull; ${completed}/13 rounds</div>
+      <div class="game-row-info" data-action="resume-game" data-id="${game.id}">
+        <div class="game-row-title">${escapeHtml(name)}</div>
+        <div class="game-row-meta">${game.players.length} players &bull; ${completed}/${TOTAL_ROUNDS} rounds</div>
       </div>
-      <button class="game-row-delete" onclick="event.stopPropagation();promptDeleteGame('${game.id}')">🗑</button>
+      <button class="game-row-delete" aria-label="Delete game" data-action="delete-game" data-id="${game.id}">🗑</button>
     `;
     container.appendChild(row);
   });
@@ -985,8 +1024,10 @@ function renderHistoryPage() {
 
   if (games.length === 0) {
     container.innerHTML = `
-      <div class="asset-circle">
-        <img src="assets/status.png" alt="No Games" style="width:100%;height:100%;object-fit:cover;" onerror="this.outerHTML='🕐'">
+      <div class="empty-state">
+        <div class="asset-circle" style="margin-bottom:16px">
+          <img src="assets/status.png" alt="No games" style="width:100%;height:100%;object-fit:cover;" data-fallback="🕐">
+        </div>
         <p style="font-size:18px;margin-bottom:8px">No completed games yet</p>
         <p>Finish a game to see it here!</p>
       </div>`;
@@ -995,16 +1036,16 @@ function renderHistoryPage() {
 
   games.forEach(game => {
     const name = game.gameName || autoGenerateName(game.dateCreated);
-    const sorted = [...game.players].sort((a,b) => playerTotal(a) - playerTotal(b));
+    const sorted = [...game.players].sort((a, b) => playerTotal(a) - playerTotal(b));
     const winner = sorted[0];
     const winTotal = playerTotal(winner);
 
     const card = document.createElement('div');
     card.className = 'card mb8';
     card.innerHTML = `
-      <p style="font-size:17px;font-weight:600;margin-bottom:6px">${name}</p>
+      <p style="font-size:17px;font-weight:600;margin-bottom:6px">${escapeHtml(name)}</p>
       <p style="font-family:'Crimson Text',serif;font-size:15px;margin-bottom:4px">
-        <strong>Winner:</strong> ${winner.name} (${winTotal} pts)
+        <strong>Winner:</strong> ${escapeHtml(winner.name)} (${winTotal} pts)
       </p>
       <p class="text-small">${game.players.length} players</p>
     `;
@@ -1034,26 +1075,81 @@ function abandonGame() {
 // ══════════════════════════════════════════════
 // MODAL HELPERS
 // ══════════════════════════════════════════════
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-}
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
+// ══════════════════════════════════════════════
+// EVENT WIRING (delegated — no inline handlers)
+//
+// Every interactive element carries a data-action.
+// One listener on <body> looks up the action in the
+// ACTIONS table and runs it, reading any data-* params
+// from the element. This covers both static markup and
+// anything rendered dynamically, with no per-element
+// listener bookkeeping.
+// ══════════════════════════════════════════════
+const ACTIONS = {
+  'nav':            el => showPage(el.dataset.page),
+  'players-inc':    () => adjustPlayers(1),
+  'players-dec':    () => adjustPlayers(-1),
+  'start-game':     () => startNewGame(),
+  'test-mode':      () => startTestMode(),
+  'exit':           () => confirmExit(),
+  'status':         () => showStatus(),
+  'save-scores':    () => saveScores(),
+  'back-to-play':   () => goBackToPlay(),
+  'new-game-final': () => newGameFromFinal(),
+  'save-and-exit':  () => saveAndExit(),
+  'abandon':        () => abandonGame(),
+  'confirm-delete': () => confirmDeleteGame(),
+  'save-edit':      () => saveEditedScore(),
+  'close-modal':    el => closeModal(el.dataset.modal),
+  'resume-game':    el => resumeGame(el.dataset.id),
+  'delete-game':    el => promptDeleteGame(el.dataset.id),
+  'edit-score':     el => openEditScore(Number(el.dataset.player), Number(el.dataset.round))
+};
 
-// Close modal on overlay click
+document.body.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const handler = ACTIONS[el.dataset.action];
+  if (handler) handler(el);
+});
+
+// Live-update the in-memory setup names as the user types.
+document.body.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset && el.dataset.action === 'setup-name') {
+    _setupNames[Number(el.dataset.index)] = el.value;
+  }
+});
+
+// Image fallback: swap a broken <img> for its data-fallback glyph.
+// Uses the capture phase because the `error` event does not bubble.
+document.addEventListener('error', e => {
+  const img = e.target;
+  if (!(img instanceof HTMLImageElement) || !img.dataset.fallback) return;
+  const glyph = img.dataset.fallback;
+  if (img.dataset.fallbackTarget === 'parent' && img.parentElement) {
+    img.parentElement.textContent = glyph;
+  } else {
+    img.replaceWith(document.createTextNode(glyph));
+  }
+}, true);
+
+// Close the open modal on background click or Escape.
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', e => {
     if (e.target === overlay) overlay.classList.remove('open');
   });
 });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const open = document.querySelector('.modal-overlay.open');
+  if (open) open.classList.remove('open');
+});
 
-// ══════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════
-
-// Scroll focused input into view when keyboard opens (iOS fix)
+// Scroll a focused input into view when the on-screen keyboard opens (iOS).
 document.addEventListener('focusin', e => {
   if (e.target.matches('input')) {
     setTimeout(() => {
@@ -1062,6 +1158,9 @@ document.addEventListener('focusin', e => {
   }
 });
 
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
 renderHome();
 </script>
 </body>
